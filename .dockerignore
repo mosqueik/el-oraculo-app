@@ -1,0 +1,74 @@
+# ═══════════════════════════════════════════════════════════════════
+# EL ORÁCULO — Docker Ignore (Root)
+# ═══════════════════════════════════════════════════════════════════
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+backend/dist/
+shared/dist/
+mobile/
+
+# Database files
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+backend/data/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docs
+docs/
+README.md
+PROJECT_STATE.md
+
+# Testing
+coverage/
+.hirez
+backend/tests/
+*.test.ts
+*.spec.ts
+
+# Docker files (don't include in context)
+docker-compose.yml
+docker-compose.*.yml
+
+# Scripts
+scripts/
+
+# Logs
+logs/
+*.log
+
+# Expo (mobile)
+.expo/
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+
+# TypeScript build info
+*.tsbuildinfo

@@ -1,0 +1,70 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+
+# Database
+*.db
+*.db-journal
+*.db-wal
+backend/data/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Runtime
+pids/
+*.pid
+*.seed
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Expo
+.expo/
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage
+coverage/
+
+# Docker
+nginx/certs/
+
+# Fly.io
+.fly/
+
+# Testing
+.hirez
+
+# Large files / data
+n8n_data/
+obsidian_vault/
+output/
+emails/
+*.pdf

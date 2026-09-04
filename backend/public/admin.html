@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Oráculo — Admin Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+        }
+        .header {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { color: #f0f6fc; font-size: 20px; }
+        .header .admin-badge {
+            background: #da3633;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .nav {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 0 24px;
+            display: flex;
+            gap: 0;
+        }
+        .nav button {
+            background: none;
+            border: none;
+            color: #8b949e;
+            padding: 12px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .nav button:hover { color: #c9d1d9; }
+        .nav button.active {
+            color: #f0f6fc;
+            border-bottom-color: #f78166;
+        }
+        .container { padding: 24px; max-width: 1400px; margin: 0 auto; }
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .stat-card .label { color: #8b949e; font-size: 12px; text-transform: uppercase; }
+        .stat-card .value { color: #f0f6fc; font-size: 28px; font-weight: bold; margin-top: 4px; }
+        .stat-card .sub { color: #8b949e; font-size: 12px; margin-top: 4px; }
+        
+        /* Tables */
+        .table-container {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .table-header {
+            padding: 16px;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .table-header h3 { color: #f0f6fc; font-size: 16px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #21262d; }
+        th { color: #8b949e; font-size: 12px; text-transform: uppercase; font-weight: 600; }
+        td { font-size: 14px; }
+        tr:hover { background: #1c2128; }
+        
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .badge-free { background: #1f6feb33; color: #58a6ff; }
+        .badge-pro { background: #23863633; color: #3fb950; }
+        .badge-enterprise { background: #8957e533; color: #bc8cff; }
+        .badge-active { background: #23863633; color: #3fb950; }
+        .badge-canceled { background: #da363333; color: #f85149; }
+        
+        /* Charts */
+        .chart-container {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .chart-title { color: #f0f6fc; font-size: 16px; margin-bottom: 16px; }
+        .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 150px; }
+        .bar {
+            flex: 1;
+            background: #f78166;
+            border-radius: 4px 4px 0 0;
+            min-height: 4px;
+            position: relative;
+            transition: height 0.3s;
+        }
+        .bar:hover { background: #ff9b7b; }
+        .bar-label {
+            position: absolute;
+            bottom: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #8b949e;
+            white-space: nowrap;
+        }
+        .bar-value {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #c9d1d9;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            background: #21262d;
+            color: #c9d1d9;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .btn:hover { background: #30363d; }
+        .btn-danger { border-color: #da3633; color: #f85149; }
+        .btn-danger:hover { background: #da363333; }
+        
+        /* Loading */
+        .loading { text-align: center; padding: 40px; color: #8b949e; }
+        
+        /* Login */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .login-form {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 32px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-form h2 { color: #f0f6fc; margin-bottom: 24px; text-align: center; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; color: #8b949e; font-size: 12px; margin-bottom: 4px; }
+        .form-group input {
+            width: 100%;
+            padding: 8px 12px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 14px;
+        }
+        .form-group input:focus { outline: none; border-color: #58a6ff; }
+        .btn-primary {
+            width: 100%;
+            padding: 10px;
+            background: #238636;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .btn-primary:hover { background: #2ea043; }
+        .error { color: #f85149; font-size: 12px; margin-top: 8px; text-align: center; }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-form">
+            <h2>🪙 El Oráculo Admin</h2>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" placeholder="admin@eloraculo.app">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="••••••••">
+            </div>
+            <button class="btn-primary" onclick="login()">Login</button>
+            <div id="loginError" class="error"></div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" style="display: none;">
+        <div class="header">
+            <h1>🪙 El Oráculo — Admin Dashboard</h1>
+            <div>
+                <span class="admin-badge">ADMIN</span>
+                <button class="btn" onclick="logout()" style="margin-left: 12px;">Logout</button>
+            </div>
+        </div>
+        
+        <div class="nav">
+            <button class="active" onclick="showSection('overview')">Overview</button>
+            <button onclick="showSection('users')">Users</button>
+            <button onclick="showSection('revenue')">Revenue</button>
+            <button onclick="showSection('trades')">Trades</button>
+            <button onclick="showSection('system')">System</button>
+        </div>
+        
+        <div class="container">
+            <!-- Overview Section -->
+            <div id="overview" class="section active">
+                <div class="stats-grid" id="overviewStats"></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="chart-container">
+                        <div class="chart-title">Trades by Decision</div>
+                        <div class="bar-chart" id="decisionsChart"></div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">Users by Plan</div>
+                        <div class="bar-chart" id="plansChart"></div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Recent Trades</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Coin</th>
+                                <th>Decision</th>
+                                <th>Price</th>
+                                <th>PnL</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentTradesTable"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Users Section -->
+            <div id="users" class="section">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>All Users</h3>
+                        <span id="userCount"></span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Name</th>
+                                <th>Plan</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Revenue Section -->
+            <div id="revenue" class="section">
+                <div class="stats-grid" id="revenueStats"></div>
+                <div class="chart-container">
+                    <div class="chart-title">Monthly Revenue</div>
+                    <div class="bar-chart" id="revenueChart"></div>
+                </div>
+            </div>
+            
+            <!-- Trades Section -->
+            <div id="trades" class="section">
+                <div class="stats-grid" id="tradeStats"></div>
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Win Rate by Coin</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Coin</th>
+                                <th>Total Sells</th>
+                                <th>Wins</th>
+                                <th>Win Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="winRateTable"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- System Section -->
+            <div id="system" class="section">
+                <div class="stats-grid" id="systemStats"></div>
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Database Tables</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Table</th>
+                                <th>Rows</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablesTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('admin_token');
+        
+        // Check if already logged in
+        if (token) {
+            showDashboard();
+            loadDashboard();
+        }
+        
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await res.json();
+                
+                if (data.token) {
+                    token = data.token;
+                    localStorage.setItem('admin_token', token);
+                    showDashboard();
+                    loadDashboard();
+                } else {
+                    document.getElementById('loginError').textContent = data.error || 'Login failed';
+                }
+            } catch (err) {
+                document.getElementById('loginError').textContent = 'Connection error';
+            }
+        }
+        
+        function logout() {
+            token = null;
+            localStorage.removeItem('admin_token');
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('adminDashboard').style.display = 'none';
+        }
+        
+        function showDashboard() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminDashboard').style.display = 'block';
+        }
+        
+        function showSection(name) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById(name).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Load section data
+            if (name === 'overview') loadDashboard();
+            else if (name === 'users') loadUsers();
+            else if (name === 'revenue') loadRevenue();
+            else if (name === 'trades') loadTrades();
+            else if (name === 'system') loadSystem();
+        }
+        
+        async function api(path) {
+            const res = await fetch(path, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.status === 401) {
+                logout();
+                return null;
+            }
+            return res.json();
+        }
+        
+        async function loadDashboard() {
+            const data = await api('/api/admin/dashboard');
+            if (!data) return;
+            
+            const d = data.data;
+            
+            // Stats
+            document.getElementById('overviewStats').innerHTML = `
+                <div class="stat-card">
+                    <div class="label">Total Users</div>
+                    <div class="value">${d.users.total}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Active Subscriptions</div>
+                    <div class="value">${d.subscriptions.active}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Total Revenue</div>
+                    <div class="value">$${d.revenue.total.toFixed(2)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Revenue This Month</div>
+                    <div class="value">$${d.revenue.thisMonth.toFixed(2)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Total Trades</div>
+                    <div class="value">${d.trading.totalTrades}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Trades Today</div>
+                    <div class="value">${d.trading.tradesToday}</div>
+                </div>
+            `;
+            
+            // Decisions chart
+            const decisions = d.trading.decisionsByType;
+            const maxDec = Math.max(...Object.values(decisions), 1);
+            document.getElementById('decisionsChart').innerHTML = Object.entries(decisions).map(([k, v]) => `
+                <div class="bar" style="height: ${(v / maxDec) * 100}%">
+                    <div class="bar-value">${v}</div>
+                    <div class="bar-label">${k}</div>
+                </div>
+            `).join('');
+            
+            // Plans chart
+            const plans = d.users.byPlan;
+            const maxPlan = Math.max(...Object.values(plans), 1);
+            document.getElementById('plansChart').innerHTML = Object.entries(plans).map(([k, v]) => `
+                <div class="bar" style="height: ${(v / maxPlan) * 100}%; background: ${k === 'pro' ? '#3fb950' : k === 'enterprise' ? '#bc8cff' : '#58a6ff'}">
+                    <div class="bar-value">${v}</div>
+                    <div class="bar-label">${k}</div>
+                </div>
+            `).join('');
+            
+            // Recent trades
+            document.getElementById('recentTradesTable').innerHTML = d.recentTrades.map(t => `
+                <tr>
+                    <td><strong>${t.coin}</strong></td>
+                    <td>${t.decision}</td>
+                    <td>$${t.precio?.toFixed(4) || '-'}</td>
+                    <td style="color: ${t.pnl?.startsWith('+') ? '#3fb950' : '#f85149'}">${t.pnl || '-'}</td>
+                    <td>${new Date(t.timestamp).toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+        
+        async function loadUsers() {
+            const data = await api('/api/admin/users');
+            if (!data) return;
+            
+            document.getElementById('userCount').textContent = `${data.data.pagination.total} users`;
+            document.getElementById('usersTable').innerHTML = data.data.users.map(u => `
+                <tr>
+                    <td>${u.id}</td>
+                    <td>${u.email}</td>
+                    <td>${u.name || '-'}</td>
+                    <td><span class="badge badge-${u.plan}">${u.plan}</span></td>
+                    <td>${new Date(u.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn" onclick="changePlan(${u.id}, 'pro')">Pro</button>
+                        <button class="btn btn-danger" onclick="deleteUser(${u.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        async function changePlan(userId, plan) {
+            if (!confirm(`Change user ${userId} to ${plan}?`)) return;
+            
+            await fetch(`/api/admin/users/${userId}/plan`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ plan })
+            });
+            
+            loadUsers();
+        }
+        
+        async function deleteUser(userId) {
+            if (!confirm(`Delete user ${userId}? This will anonymize their data.`)) return;
+            
+            await fetch(`/api/admin/users/${userId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            loadUsers();
+        }
+        
+        async function loadRevenue() {
+            const data = await api('/api/admin/revenue');
+            if (!data) return;
+            
+            const d = data.data;
+            document.getElementById('revenueStats').innerHTML = `
+                <div class="stat-card">
+                    <div class="label">Total Revenue</div>
+                    <div class="value">$${d.totalRevenue.toFixed(2)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">MRR</div>
+                    <div class="value">$${d.mrr.toFixed(2)}</div>
+                </div>
+            `;
+            
+            // Revenue chart
+            if (d.monthlyRevenue.length > 0) {
+                const maxRev = Math.max(...d.monthlyRevenue.map(m => m.revenue), 1);
+                document.getElementById('revenueChart').innerHTML = d.monthlyRevenue.map(m => `
+                    <div class="bar" style="height: ${(m.revenue / maxRev) * 100}%">
+                        <div class="bar-value">$${m.revenue.toFixed(0)}</div>
+                        <div class="bar-label">${m.month}</div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        async function loadTrades() {
+            const data = await api('/api/admin/trades');
+            if (!data) return;
+            
+            const d = data.data;
+            
+            // Win rate table
+            document.getElementById('winRateTable').innerHTML = d.winRateByCoin.map(r => `
+                <tr>
+                    <td><strong>${r.coin}</strong></td>
+                    <td>${r.totalSells}</td>
+                    <td>${r.wins}</td>
+                    <td style="color: ${parseFloat(r.winRate) >= 50 ? '#3fb950' : '#f85149'}">${r.winRate}</td>
+                </tr>
+            `).join('');
+        }
+        
+        async function loadSystem() {
+            const data = await api('/api/admin/system');
+            if (!data) return;
+            
+            const d = data.data;
+            document.getElementById('systemStats').innerHTML = `
+                <div class="stat-card">
+                    <div class="label">Uptime</div>
+                    <div class="value">${Math.floor(d.uptime / 3600)}h</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Memory (RSS)</div>
+                    <div class="value">${d.memory.rss}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Event Loop Lag</div>
+                    <div class="value">${d.eventLoopLag}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Node.js</div>
+                    <div class="value">${d.nodeVersion}</div>
+                </div>
+            `;
+            
+            document.getElementById('tablesTable').innerHTML = d.tables.map(t => `
+                <tr>
+                    <td>${t.table}</td>
+                    <td>${t.rows.toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+# ═══════════════════════════════════════════════════════════════════
+# EL ORÁCULO — Backend Docker Ignore
+# ═══════════════════════════════════════════════════════════════════
+
+node_modules/
+dist/
+data/
+logs/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.env
+.env.local
+tests/
+coverage/
+.hirez
+*.test.ts
+*.spec.ts
+.vscode/
+.idea/
+.DS_Store
