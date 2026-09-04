@@ -1,7 +1,7 @@
 {
   "name": "@el-oraculo/backend",
   "version": "1.0.0",
-  "description": "El Oráculo Trading Engine — Node.js Backend",
+  "description": "El Or\u00e1culo Trading Engine \u2014 Node.js Backend",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -20,7 +20,7 @@
     "db:check": "drizzle-kit check"
   },
   "dependencies": {
-    "@el-oraculo/shared": "*",
+    "@el-oraculo/shared": "file:./shared",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "better-sqlite3": "^11.9.1",
